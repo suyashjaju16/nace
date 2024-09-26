@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="en">
+
+    <head>
+
+        <meta charset="utf-8" />
+        <title>Career Readiness Inventory</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta content="Career Readiness Inventory" name="description" />
+        <meta content="Themesdesign" name="author" />
+        <!-- App favicon -->
+        <link rel="shortcut icon" href="assets/images/favicon.ico">
+
+        <!-- jquery.vectormap css -->
+        <link
+            href="assets/libs/admin-resources/jquery.vectormap/jquery-jvectormap-1.2.2.css"
+            rel="stylesheet"
+            type="text/css" />
+
+        <link rel="stylesheet" href="assets/libs/morris.js/morris.css">
+
+        <!-- DataTables -->
+        <link
+            href="assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css"
+            rel="stylesheet" type="text/css" />
+
+        <!-- Responsive datatable examples -->
+        <link
+            href="assets/libs/datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css"
+            rel="stylesheet"
+            type="text/css" />
+
+        <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+        <!-- Bootstrap Css -->
+        <link href="assets/css/bootstrap.min.css" id="bootstrap-style"
+            rel="stylesheet" type="text/css" />
+        <!-- Icons Css -->
+        <link href="assets/css/icons.min.css" rel="stylesheet"
+            type="text/css" />
+        <!-- App Css-->
+        <link href="assets/css/app.min.css" id="app-style" rel="stylesheet"
+            type="text/css" />
+
+        <link href="assets/css/neumorphism.css" id="bootstrap-style"
+            rel="stylesheet" type="text/css" />
+
+        <style type="text/css">
+        .card {
+            border-radius: 20px !important;
+        }
+
+        body {
+            font-family: "Mulish", sans-serif !important;
+        }
+
+        th {
+            padding: 12px !important;
+            text-align: center !important
+        }
+
+        td {
+            padding: 12px !important;
+            text-align: center !important;
+        }
+
+
+        /* .progress .progress-bar .progress-value {
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            border-radius: 50%;
+            font-size: 15px;
+            position: relative;
+            top: -16px;
+            right: -20px;
+            z-index: 2;
+            background-color: red;
+        } */
+
+        .progress-value {
+            background-color: #01a2b2;
+            border-radius: 50%;
+            height: 40px;
+            width: 40px;
+            text-align: center;
+            line-height: 38px;
+            z-index: 3;
+            position: absolute;
+            color: white;
+            margin-left: 75%;
+            margin-top: -18px;
+            border: solid;
+            border-color: black;
+        }
+    </style>
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,200..1000;1,200..1000&display=swap"
+            rel="stylesheet">
+
+    </head>
+
+    <body data-sidebar="dark">
+
+        <!-- <body data-layout="horizontal" data-topbar="light"> -->
+
+        <!-- Begin page -->
+        <div id="layout-wrapper">
+
+            <!-- ============================================================== -->
+            <!-- Start right Content here -->
+            <!-- ============================================================== -->
+            <div class="container">
+
+                <div class="page-content" style="padding-top: 50px!important;">
+                    <div class="container-fluid">
+                        <table id="datatable"
+                            class="table table-bordered dt-responsive nowrap"
+                            style="border-collapse: collapse; border-spacing: 0; width: 100%;"
+                            data-page-length='25'>
+                            <thead>
+                                <tr>
+                                    <th>First </th>
+                                    <th>Last </th>
+                                    <th>Email</th>
+                                    <th>Overall Score</th>
+                                    <th>Date</th>
+                                    <th>Details</th>
+
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr>
+                                    <td>Sean</td>
+                                    <td>K</td>
+                                    <td>sean@scu.edu</td>
+                                    <td>2.5</td>
+                                    <td>15th June 2024</td>
+                                    <td><a href="https://www.google.com"
+                                            target="_blank">View</a></td>
+                                </tr>
+                                <tr>
+                                    <td>Rohan</td>
+                                    <td>Balda</td>
+                                    <td>rbaldha@scu.edu</td>
+                                    <td>2.5</td>
+                                    <td>15th June 2024</td>
+                                    <td><a href="https://www.google.com"
+                                            target="_blank">View</a></td>
+                                </tr>
+                                <tr>
+                                    <td>Suyash</td>
+                                    <td>Jaju</td>
+                                    <td>sjaju@scu.edu</td>
+                                    <td>2.5</td>
+                                    <td>15th June 2024</td>
+                                    <td><a href="https://www.google.com"
+                                            target="_blank">View</a></td>
+                                </tr>
+                                <tr>
+                                    <td>Axel</td>
+                                    <td>Ruano</td>
+                                    <td>aruanou@career.academy</td>
+                                    <td>2.5</td>
+                                    <td>15th June 2024</td>
+                                    <td><a href="https://www.google.com"
+                                            target="_blank">View</a></td>
+                                </tr>
+                                <tr>
+                                    <td>Muskan</td>
+                                    <td>Panchal</td>
+                                    <td>mpanchal@scu.edu</td>
+                                    <td>2.5</td>
+                                    <td>15th June 2024</td>
+                                    <td><a href="https://www.google.com"
+                                            target="_blank">View</a></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- End Page-content -->
+
+                <footer class="footer container"
+                    style="left: 20px!important;border-radius: 24px 24px 0px 0px;">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <script>document.write(new Date().getFullYear())</script>
+                                © Career Launch.
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="text-sm-end d-none d-sm-block">
+                                    Crafted with <i
+                                        class="mdi mdi-heart text-danger"></i>
+                                    by Team Career Launch
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </footer>
+
+            </div>
+            <!-- end main content-->
+
+        </div>
+        <!-- END layout-wrapper -->
+
+        <!-- Right Sidebar -->
+        <div class="right-bar">
+            <div data-simplebar class="h-100">
+                <div
+                    class="rightbar-title d-flex align-items-center px-3 py-4 shadow">
+
+                    <h5 class="m-0 me-2">Settings</h5>
+
+                    <a href="javascript:void(0);"
+                        class="right-bar-toggle ms-auto">
+                        <i class="mdi mdi-close noti-icon"></i>
+                    </a>
+                </div>
+
+                <!-- Settings -->
+                <hr class="mt-0" />
+                <h6 class="text-center mb-0">Choose Layouts</h6>
+
+                <div class="p-4">
+                    <div class="mb-2">
+                        <img src="assets/images/layouts/layout-1.jpg"
+                            class="img-fluid img-thumbnail" alt="layout-1">
+                    </div>
+
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input theme-choice"
+                            type="checkbox" id="light-mode-switch" checked>
+                        <label class="form-check-label"
+                            for="light-mode-switch">Light Mode</label>
+                    </div>
+
+                    <div class="mb-2">
+                        <img src="assets/images/layouts/layout-2.jpg"
+                            class="img-fluid img-thumbnail" alt="layout-2">
+                    </div>
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input theme-choice"
+                            type="checkbox" id="dark-mode-switch"
+                            data-bsStyle="assets/css/bootstrap-dark.min.css"
+                            data-appStyle="assets/css/app-dark.min.css">
+                        <label class="form-check-label"
+                            for="dark-mode-switch">Dark Mode</label>
+                    </div>
+
+                    <div class="mb-2">
+                        <img src="assets/images/layouts/layout-3.jpg"
+                            class="img-fluid img-thumbnail" alt="layout-3">
+                    </div>
+                    <div class="form-check form-switch mb-5">
+                        <input class="form-check-input theme-choice"
+                            type="checkbox" id="rtl-mode-switch"
+                            data-appStyle="assets/css/app-rtl.min.css">
+                        <label class="form-check-label"
+                            for="rtl-mode-switch">RTL Mode</label>
+                    </div>
+
+                </div>
+
+            </div> <!-- end slimscroll-menu-->
+        </div>
+        <!-- /Right-bar -->
+
+        <!-- Right bar overlay-->
+        <div class="rightbar-overlay"></div>
+
+        <!-- JAVASCRIPT -->
+        <script src="assets/libs/jquery/jquery.min.js"></script>
+        <script src="assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+        <script src="assets/libs/metismenu/metisMenu.min.js"></script>
+        <script src="assets/libs/simplebar/simplebar.min.js"></script>
+        <script src="assets/libs/node-waves/waves.min.js"></script>
+
+        <!-- morris chart -->
+        <script src="assets/libs/morris.js/morris.min.js"></script>
+        <script src="assets/libs/raphael/raphael.min.js"></script>
+
+        <!-- jquery.vectormap map -->
+        <script
+            src="assets/libs/admin-resources/jquery.vectormap/jquery-jvectormap-1.2.2.min.js"></script>
+        <script
+            src="assets/libs/admin-resources/jquery.vectormap/maps/jquery-jvectormap-us-merc-en.js"></script>
+
+        <!-- Required datatable js -->
+        <script
+            src="assets/libs/datatables.net/js/jquery.dataTables.min.js"></script>
+        <script
+            src="assets/libs/datatables.net-bs4/js/dataTables.bootstrap4.min.js"></script>
+
+        <!-- Responsive examples -->
+        <script
+            src="assets/libs/datatables.net-responsive/js/dataTables.responsive.min.js"></script>
+        <script
+            src="assets/libs/datatables.net-responsive-bs4/js/responsive.bootstrap4.min.js"></script>
+
+        <script src="assets/js/pages/index.init.js"></script>
+
+        <script src="assets/libs/jquery-knob/jquery.knob.min.js"></script>
+
+        <script src="assets/js/pages/jquery-knob.init.js"></script>
+        <!-- Required datatable js -->
+        <script
+            src="assets/libs/datatables.net/js/jquery.dataTables.min.js"></script>
+        <script
+            src="assets/libs/datatables.net-bs4/js/dataTables.bootstrap4.min.js"></script>
+        <!-- Buttons examples -->
+        <script
+            src="assets/libs/datatables.net-buttons/js/dataTables.buttons.min.js"></script>
+        <script
+            src="assets/libs/datatables.net-buttons-bs4/js/buttons.bootstrap4.min.js"></script>
+        <script src="assets/libs/jszip/jszip.min.js"></script>
+        <script src="assets/libs/pdfmake/build/pdfmake.min.js"></script>
+        <script src="assets/libs/pdfmake/build/vfs_fonts.js"></script>
+        <script
+            src="assets/libs/datatables.net-buttons/js/buttons.html5.min.js"></script>
+        <script
+            src="assets/libs/datatables.net-buttons/js/buttons.print.min.js"></script>
+        <script
+            src="assets/libs/datatables.net-buttons/js/buttons.colVis.min.js"></script>
+
+        <script
+            src="assets/libs/datatables.net-keytable/js/dataTables.keyTable.min.js"></script>
+        <script
+            src="assets/libs/datatables.net-select/js/dataTables.select.min.js"></script>
+
+        <!-- Responsive examples -->
+        <script
+            src="assets/libs/datatables.net-responsive/js/dataTables.responsive.min.js"></script>
+        <script
+            src="assets/libs/datatables.net-responsive-bs4/js/responsive.bootstrap4.min.js"></script>
+
+        <!-- Datatable init js -->
+        <script src="assets/js/pages/datatables.init.js"></script>
+
+        <!-- App js -->
+        <script src="assets/js/app.js"></script>
+        <!-- <script type="text/javascript">
+            var options = {
+          series: [{
+          data: [2.7, 3, 3.4, 3, 2, 4, 3.3, 3.7]
+        }],
+          chart: {
+          type: 'bar',
+          height: 450
+        },
+        plotOptions: {
+          bar: {
+            barHeight: '80%',
+            distributed: true,
+            horizontal: true,
+            dataLabels: {
+              position: 'bottom'
+            },
+          }
+        },
+        colors: ['#ebb93b', '#56a9dd', '#705181', '#ad3131', '#796258', '#609866', '#e06b60', '#3c4b6c'],
+        dataLabels: {
+          enabled: true,
+          textAnchor: 'start',
+          style: {
+            colors: ['#fff'],
+            fontSize: '12px',
+            fontWeight: '500',
+            fontFamily : 'Mulish'
+          },
+          formatter: function (val, opt) {
+            return opt.w.globals.labels[opt.dataPointIndex] + ":  " + val
+          },
+          offsetX: 0,
+          dropShadow: {
+            enabled: true
+          }
+        },
+        stroke: {
+          width: 0,
+          colors: ['#fff']
+        },
+        xaxis: {
+          categories: ['Career & Self-Development', 'Communication', 'Critical Thinking', 'Equity & Inclusion', 'Leadership', 'Professionalism', 'Teamwork',
+            'Technology'
+          ],
+        },
+        yaxis: {
+          labels: {
+            show: false
+          }
+        },
+        title: {
+            text: 'Career Readiness Inventory',
+            align: 'center',
+            floating: true
+        },
+        subtitle: {
+            text: '',
+            align: 'center',
+        },
+        legend: {
+            show : false
+        },
+        tooltip: {
+          theme: 'dark',
+          x: {
+            show: false
+          },
+          y: {
+            title: {
+              formatter: function () {
+                return ''
+              }
+            }
+          }
+        }
+        };
+
+        var chart = new ApexCharts(document.querySelector("#inventorychart"), options);
+        chart.render();
+
+</script> -->
+
+        <script>
+
+        var options = {
+            series: [{
+                name: 'Emerging Knowledge',
+                data: [44, 55, 41, 37, 22, 43, 21, 10]
+            }, {
+                name: 'Understanding',
+                data: [53, 32, 33, 52, 13, 43, 32, 20]
+            }, {
+                name: 'Early Application',
+                data: [12, 17, 11, 9, 15, 11, 20, 30]
+            }, {
+                name: 'Advanced Application',
+                data: [9, 7, 5, 8, 6, 9, 4, 40]
+            },
+            ],
+            chart: {
+                type: 'bar',
+                height: 350,
+                stacked: true,
+                stackType: '100%'
+            },
+            plotOptions: {
+                bar: {
+                    horizontal: true,
+                },
+            },
+            stroke: {
+                width: 1,
+                colors: ['#fff']
+            },
+            title: {
+                text: 'Inventory Chart'
+            },
+            xaxis: {
+                categories: ['Career & Self-Development', 'Communication', 'Critical Thinking', 'Equity & Inclusion', 'Leadership', 'Professionalism', 'Teamwork',
+                    'Technology'],
+            },
+            tooltip: {
+                y: {
+                    formatter: function (val) {
+                        return val + "K"
+                    }
+                }
+            },
+            fill: {
+                opacity: 1
+
+            },
+            legend: {
+                position: 'top',
+                horizontalAlign: 'left',
+                offsetX: 40
+            }
+        };
+
+        var chart = new ApexCharts(document.querySelector("#inventorychart"), options);
+        chart.render();
+
+
+    </script>
+    </body>
+
+</html>
