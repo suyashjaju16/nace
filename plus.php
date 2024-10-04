@@ -1,27 +1,81 @@
 <?php 
-// create & initialize a curl session
-$curl = curl_init();
+include("./models/config.php");
+include("./models/plus/social-capital-bar.php");
 
-// set our url with curl_setopt()
-curl_setopt($curl, CURLOPT_URL, "https://mnkw9qkrt3.execute-api.us-east-2.amazonaws.com/test/Print?firstgen=yes&universityName=UMass_Boston");
+function dataformatter($data){
+    $dataArray = json_decode($data, true);
 
-// return the transfer as a string, also with setopt()
-curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+    $formattedData = [];
 
-// curl_exec() executes the started curl session
-// $output contains the output string
-$output = curl_exec($curl);
+    foreach ($dataArray as $question => $details) {
+        $formattedData['data'] = []; 
+        
+        foreach ($details['values'] as $index => $value) {
+            $formattedData['data'][] = [
+                'y' => $value,
+                'per' => intval($details['percentages'][$index])
+            ];
+        }
+        $dataArray[$question]['formatted_data'] = $formattedData['data'];
+    }
+    $updatedJson = json_encode($dataArray, JSON_PRETTY_PRINT);
+    return json_decode($updatedJson, true);
+}
 
-// close curl resource to free up system resources
-// (deletes the variable made by curl_init)
-curl_close($curl);
+$social_bars_data = dataformatter($social_capital_bars);
 
-$result = json_decode($output,true);
+include("./models/plus/life-design.php");
+$life_design_data = dataformatter($life_design);
 
-// echo $output;
+include("./models/plus/career-mobility-bars.php");
+$career_mobility_data = dataformatter($career_mobility_bars);
+// echo "<hr>";
+include("./models/plus/career-mobility-pie.php");
+$career_mobility_pie_data = dataformatter($career_mobility_pie);
+// echo json_encode($career_mobility_data);
+// echo json_encode($career_mobility_pie_data['Career Counselor (Choose Below)'],JSON_PRETTY_PRINT);
 
-// echo $output['result']['NumStudents'];
-// echo $result['result']['university'];
+include("./models/plus/social-capital-pie.php");
+// $social_pie_data = json_encode($social_capital_pie);
+// Decode the JSON into an associative array
+// $data = json_decode($social_pie_data, true);
+
+// Access specific nested keys
+// $category = json_encode($data);
+// echo $social_capital_pie;
+
+$social_pie_data = json_decode($social_capital_pie, true);
+
+// echo json_encode($social_pie_data['I have proactively asked family members (other than parents/guardians) and friends about their job or career.']['Family Members (Choose Below)']['values']);
+
+// Function to get values and labels for a specified key
+function getValuesOrLabelsInJson($mainKey, $subKey, $type) {
+    global $data; // Use the global data variable
+    
+    if (isset($data[$mainKey]) && isset($data[$mainKey][$subKey])) {
+        if ($type === 'values') {
+            // Return the values array as JSON
+            return json_encode($data[$mainKey][$subKey]['values']);
+        } elseif ($type === 'labels') {
+            // Return the labels array as JSON
+            return json_encode($data[$mainKey][$subKey]['labels']);
+        } else {
+            return json_encode(["error" => "Invalid type requested"]);
+        }
+    } else {
+        return json_encode(["error" => "Key not found"]);
+    }
+}
+
+// echo getValuesOrLabelsInJson(
+//     "I have proactively asked family members (other than parents/guardians) and friends about their job or career.",
+//     "Family Members (Choose Below)",
+//     "values");
+
+// echo getValuesOrLabelsInJson(
+//     "I have proactively asked family members (other than parents/guardians) and friends about their job or career.",
+//     "Family Members (Choose Below)",
+//     "labels");
 
 ?>
 <!doctype html>
@@ -491,7 +545,11 @@ $result = json_decode($output,true);
                                                             <div class="col-sm-6">
                                                                 <div class="card border-2">
                                                                     <div class="card-body">
-                                                                        <div id="social_chart3" class="apex-charts"
+                                                                        <div class="card-title">
+                                                                            <h6 style="font-size:18px">Family Members
+                                                                            </h6>
+                                                                        </div>
+                                                                        <div id="social_chart3" class="apex-charts mt-2"
                                                                             dir="ltr" style="height:260px">
                                                                         </div>
                                                                     </div>
@@ -500,7 +558,11 @@ $result = json_decode($output,true);
                                                             <div class="col-sm-6">
                                                                 <div class="card border-2">
                                                                     <div class="card-body">
-                                                                        <div id="social_chart4" class="apex-charts"
+                                                                        <div class="card-title">
+                                                                            <h6 style="font-size:18px">Friends and
+                                                                                Family Friends</h6>
+                                                                        </div>
+                                                                        <div id="social_chart4" class="apex-charts mt-2"
                                                                             dir="ltr" style="height:260px">
                                                                         </div>
                                                                     </div>
@@ -1497,10 +1559,10 @@ $result = json_decode($output,true);
         <script src="assets/js/app.js"></script>
         <script>
         var options = {
-            series: [25, 25, 25, 25],
+            series: <?= json_encode($social_pie_data['I have relationships with former employers and teachers/professors who would be willing to give me a formal recommendation if/when needed.']['Employers (Choose Below)']['values']); ?>,
             chart: {
                 type: 'donut',
-                height: 400,
+                height: 250,
                 width: 300,
             },
             fill: {
@@ -1513,7 +1575,7 @@ $result = json_decode($output,true);
             tooltip: {
                 fillSeriesColor: true, // Tooltip uses the series fill color              
             },
-            labels: ['Not yet', '1 Relationship', '2 Relationship', '3 or more Relationship'],
+            labels: <?= json_encode($social_pie_data['I have relationships with former employers and teachers/professors who would be willing to give me a formal recommendation if/when needed.']['Employers (Choose Below)']['labels']); ?>,
             responsive: [{
                 breakpoint: 480,
                 options: {
@@ -1530,289 +1592,11 @@ $result = json_decode($output,true);
         var chart = new ApexCharts(document.querySelector("#social_chart1"), options);
         chart.render();
 
-        // Highcharts.chart('social_chart1', {
-        //     chart: {
-        //         type: 'pie',
-        //         custom: {},
-        //         events: {
-        //             render() {
-        //                 const chart = this,
-        //                     series = chart.series[0];
-
-
-        //             }
-        //         }
-        //     },
-        //     accessibility: {
-        //         point: {
-        //             valueSuffix: '%'
-        //         }
-        //     },
-        //     title: {
-        //         text: ''
-        //     },
-        //     tooltip: {
-        //         pointFormat: '{series.name}: <b>{point.percentage:.0f}%</b>'
-        //     },
-        //     legend: {
-        //         enabled: false
-        //     },
-        //     events: {
-        //         legendItemClick: function() {
-        //             return false; // <== returning false will cancel the default action
-        //         }
-        //     },
-        //     plotOptions: {
-        //         series: {
-        //             allowPointSelect: true,
-        //             cursor: 'pointer',
-        //             colors: ['#2a4c09', '#457010', '#385b4f', '#b1d8b7'],
-        //             borderRadius: 8,
-        //             dataLabels: [{
-        //                 enabled: true,
-        //                 distance: 20,
-        //                 format: '{point.name}'
-        //             }, {
-        //                 enabled: true,
-        //                 distance: -15,
-        //                 format: '{point.percentage:.0f}%',
-        //                 style: {
-        //                     fontSize: '0.9em'
-        //                 }
-        //             }],
-        //             showInLegend: true
-        //         }
-        //     },
-        //     series: [{
-        //         name: 'Registrations',
-        //         colorByPoint: true,
-        //         innerSize: '75%',
-        //         data: [{
-        //             name: 'Not Yet',
-        //             y: 23.9
-        //         }, {
-        //             name: '1 Relationship',
-        //             y: 12.6
-        //         }, {
-        //             name: '2 Relationship',
-        //             y: 37.0
-        //         }, {
-        //             name: '3 or more Relationship',
-        //             y: 26.4
-        //         }]
-        //     }]
-        // });
-
-        // Highcharts.chart('social_chart2', {
-        //     chart: {
-        //         type: 'pie',
-        //         custom: {},
-        //         events: {
-        //             render() {
-        //                 const chart = this,
-        //                     series = chart.series[0];
-
-
-        //             }
-        //         }
-        //     },
-        //     accessibility: {
-        //         point: {
-        //             valueSuffix: '%'
-        //         }
-        //     },
-        //     title: {
-        //         text: ''
-        //     },
-        //     tooltip: {
-        //         pointFormat: '{series.name}: <b>{point.percentage:.0f}%</b>'
-        //     },
-        //     legend: {
-        //         enabled: false
-        //     },
-        //     plotOptions: {
-        //         series: {
-        //             allowPointSelect: true,
-        //             cursor: 'pointer',
-        //             colors: ['#2a4c09', '#457010', '#385b4f', '#b1d8b7'],
-        //             borderRadius: 8,
-        //             dataLabels: [{
-        //                 enabled: true,
-        //                 distance: 20,
-        //                 format: '{point.name}'
-        //             }, {
-        //                 enabled: true,
-        //                 distance: -15,
-        //                 format: '{point.percentage:.0f}%',
-        //                 style: {
-        //                     fontSize: '0.9em'
-        //                 }
-        //             }],
-        //             showInLegend: true
-        //         }
-        //     },
-        //     series: [{
-        //         name: 'Responses',
-        //         colorByPoint: true,
-        //         innerSize: '75%',
-        //         data: [{
-        //             name: 'Not Yet',
-        //             y: 23.9
-        //         }, {
-        //             name: '1 Relationship',
-        //             y: 12.6
-        //         }, {
-        //             name: '2 Relationship',
-        //             y: 37.0
-        //         }, {
-        //             name: '3 or more Relationship',
-        //             y: 26.4
-        //         }]
-        //     }]
-        // });
-
-        // Highcharts.chart('social_chart3', {
-        //     chart: {
-        //         type: 'pie',
-        //         custom: {},
-        //         events: {
-        //             render() {
-        //                 const chart = this,
-        //                     series = chart.series[0];
-
-
-        //             }
-        //         }
-        //     },
-        //     accessibility: {
-        //         point: {
-        //             valueSuffix: '%'
-        //         }
-        //     },
-        //     title: {
-        //         text: ''
-        //     },
-        //     tooltip: {
-        //         pointFormat: '{series.name}: <b>{point.percentage:.0f}%</b>'
-        //     },
-        //     legend: {
-        //         enabled: false
-        //     },
-        //     plotOptions: {
-        //         series: {
-        //             allowPointSelect: true,
-        //             cursor: 'pointer',
-        //             colors: ['#2a4c09', '#457010', '#385b4f', '#b1d8b7'],
-        //             borderRadius: 8,
-        //             dataLabels: [{
-        //                 enabled: true,
-        //                 distance: 20,
-        //                 format: '{point.name}'
-        //             }, {
-        //                 enabled: true,
-        //                 distance: -15,
-        //                 format: '{point.percentage:.0f}%',
-        //                 style: {
-        //                     fontSize: '0.9em'
-        //                 }
-        //             }],
-        //             showInLegend: true
-        //         }
-        //     },
-        //     series: [{
-        //         name: 'Registrations',
-        //         colorByPoint: true,
-        //         innerSize: '75%',
-        //         data: [{
-        //             name: 'Not and I had not considered this',
-        //             y: 23.9
-        //         }, {
-        //             name: 'Not yet but I plan to',
-        //             y: 12.6
-        //         }, {
-        //             name: 'Yes, Once',
-        //             y: 37.0
-        //         }, {
-        //             name: 'Yes, Multiple times',
-        //             y: 26.4
-        //         }]
-        //     }]
-        // });
-
-        // Highcharts.chart('social_chart4', {
-        //     chart: {
-        //         type: 'pie',
-        //         custom: {},
-        //         events: {
-        //             render() {
-        //                 const chart = this,
-        //                     series = chart.series[0];
-
-
-        //             }
-        //         }
-        //     },
-        //     accessibility: {
-        //         point: {
-        //             valueSuffix: '%'
-        //         }
-        //     },
-        //     title: {
-        //         text: ''
-        //     },
-        //     tooltip: {
-        //         pointFormat: '{series.name}: <b>{point.percentage:.0f}%</b>'
-        //     },
-        //     legend: {
-        //         enabled: false
-        //     },
-        //     plotOptions: {
-        //         series: {
-        //             allowPointSelect: true,
-        //             cursor: 'pointer',
-        //             colors: ['#2a4c09', '#457010', '#385b4f', '#b1d8b7'],
-        //             borderRadius: 8,
-        //             dataLabels: [{
-        //                 enabled: true,
-        //                 distance: 20,
-        //                 format: '{point.name}'
-        //             }, {
-        //                 enabled: true,
-        //                 distance: -15,
-        //                 format: '{point.percentage:.0f}%',
-        //                 style: {
-        //                     fontSize: '0.9em'
-        //                 }
-        //             }],
-        //             showInLegend: true
-        //         }
-        //     },
-        //     series: [{
-        //         name: 'Registrations',
-        //         colorByPoint: true,
-        //         innerSize: '75%',
-        //         data: [{
-        //             name: 'Not and I had not considered this',
-        //             y: 23.9
-        //         }, {
-        //             name: 'Not yet but I plan to',
-        //             y: 12.6
-        //         }, {
-        //             name: 'Yes, Once',
-        //             y: 37.0
-        //         }, {
-        //             name: 'Yes, Multiple times',
-        //             y: 26.4
-        //         }]
-        //     }]
-        // });
-
-
         var options = {
-            series: [25, 25, 25, 25],
+            series: <?= json_encode($social_pie_data['I have relationships with former employers and teachers/professors who would be willing to give me a formal recommendation if/when needed.']['Teachers/Professors (Choose Below)']['values']); ?>,
             chart: {
                 type: 'donut',
-                height: 400,
+                height: 250,
                 width: 300
             },
             fill: {
@@ -1821,7 +1605,7 @@ $result = json_decode($output,true);
             legend: {
                 show: false
             },
-            labels: ['Not yet', '1 Relationship', '2 Relationship', '3 or more Relationship'],
+            labels: <?= json_encode($social_pie_data['I have relationships with former employers and teachers/professors who would be willing to give me a formal recommendation if/when needed.']['Teachers/Professors (Choose Below)']['values']); ?>,
             responsive: [{
                 breakpoint: 480,
                 options: {
@@ -1839,10 +1623,10 @@ $result = json_decode($output,true);
         chart.render();
 
         var options = {
-            series: [25, 25, 25, 25],
+            series: <?= json_encode($social_pie_data['I have proactively asked family members (other than parents/guardians) and friends about their job or career.']['Family Members (Choose Below)']['values']);?>,
             chart: {
                 type: 'donut',
-                height: 400,
+                height: 250,
                 width: 300
             },
             fill: {
@@ -1851,9 +1635,7 @@ $result = json_decode($output,true);
             legend: {
                 show: false
             },
-            labels: ['Not and I had not considered this', 'Not yet but I plan to', 'Yes, Once',
-                'Yes, Multiple times'
-            ],
+            labels: <?= json_encode($social_pie_data['I have proactively asked family members (other than parents/guardians) and friends about their job or career.']['Family Members (Choose Below)']['labels']);?>,
             responsive: [{
                 breakpoint: 480,
                 options: {
@@ -1871,10 +1653,10 @@ $result = json_decode($output,true);
         chart.render();
 
         var options = {
-            series: [25, 25, 25, 25],
+            series: <?= json_encode($social_pie_data['I have proactively asked family members (other than parents/guardians) and friends about their job or career.']['Friends and Family Friends (Choose Below)']['values']);?>,
             chart: {
                 type: 'donut',
-                height: 400,
+                height: 250,
                 width: 300
             },
             fill: {
@@ -1883,9 +1665,7 @@ $result = json_decode($output,true);
             legend: {
                 show: false
             },
-            labels: ['Not and I had not considered this', 'Not yet but I plan to', 'Yes, Once',
-                'Yes, Multiple times'
-            ],
+            labels: <?= json_encode($social_pie_data['I have proactively asked family members (other than parents/guardians) and friends about their job or career.']['Friends and Family Friends (Choose Below)']['labels']);?>,
             responsive: [{
                 breakpoint: 480,
                 options: {
@@ -1910,7 +1690,7 @@ $result = json_decode($output,true);
             },
 
             title: {
-                text: 'Which of the following best represent your program or area of study?',
+                text: 'I feel confident proactively introducing myself to professionals I have never met (who could be helpful in my career).',
                 align: 'left'
             },
 
@@ -1931,9 +1711,7 @@ $result = json_decode($output,true);
             },
 
             xAxis: {
-                categories: ['Strongly Disagree', 'Disagree', 'Agree',
-                    'Strongly Agree'
-                ],
+                categories: <?= json_encode($social_bars_data['I feel confident proactively introducing myself to professionals I have never met (who could be helpful in my career).']['labels']);?>,
                 crosshair: true,
                 accessibility: {
                     description: 'Labels'
@@ -1949,21 +1727,17 @@ $result = json_decode($output,true);
             series: [{
                 dataLabels: [{
                     align: 'right',
-                    format: '{y} ({point.per}%)'
+                    inside: false,
+                    floating: true,
+                    formatter: function() {
+                        var max = this.series.yAxis.max;
+                        var color = this.y / max <= 0.1 ? 'black' : 'white'; // 5% width
+                        perc = ((this.y / max).toFixed(2)) * 100;
+                        return '<span style="color: ' + color + '">' + this.y + '(' + perc +
+                            '%)</span>';
+                    },
                 }],
-                data: [{
-                    y: 40,
-                    per: 72,
-                }, {
-                    y: 30,
-                    per: 74,
-                }, {
-                    y: 48,
-                    per: 83
-                }, {
-                    y: 10,
-                    per: 100000
-                }],
+                data: <?= json_encode($social_bars_data['I feel confident proactively introducing myself to professionals I have never met (who could be helpful in my career).']['formatted_data']);?>,
                 showInLegend: false
             }]
 
@@ -1977,7 +1751,7 @@ $result = json_decode($output,true);
             },
 
             title: {
-                text: 'Which of the following best represent your program or area of study?',
+                text: 'I have proactively asked someone I know to introduce me to someone they know so I can talk to them to learn about their career.',
                 align: 'left'
             },
 
@@ -1992,15 +1766,13 @@ $result = json_decode($output,true);
                     color: '#1e5e34',
                     dataLabels: {
                         enabled: true,
-                        inside: true,
+                        inside: false,
                     }
                 },
             },
 
             xAxis: {
-                categories: ['Not and I had not considered this', 'Not yet but I plan to', 'Yes, Once',
-                    'Yes, Multiple times'
-                ],
+                categories: <?= json_encode($social_bars_data['I have proactively asked someone I know to introduce me to someone they know so I can talk to them to learn about their career.']['labels']);?>,
                 crosshair: true,
                 accessibility: {
                     description: 'Labels'
@@ -2016,21 +1788,17 @@ $result = json_decode($output,true);
             series: [{
                 dataLabels: [{
                     align: 'right',
-                    format: '{y} ({point.per}%)'
+                    inside: false,
+                    floating: true,
+                    formatter: function() {
+                        var max = this.series.yAxis.max;
+                        var color = this.y / max <= 0.1 ? 'black' : 'white'; // 5% width
+                        perc = ((this.y / max).toFixed(2)) * 100;
+                        return '<span style="color: ' + color + '">' + this.y + '(' + perc +
+                            '%)</span>';
+                    },
                 }],
-                data: [{
-                    y: 40,
-                    per: 72,
-                }, {
-                    y: 30,
-                    per: 74,
-                }, {
-                    y: 48,
-                    per: 83
-                }, {
-                    y: 47,
-                    per: 80
-                }],
+                data: <?= json_encode($social_bars_data['I have proactively asked someone I know to introduce me to someone they know so I can talk to them to learn about their career.']['formatted_data']);?>,
                 showInLegend: false
             }]
 
@@ -2043,7 +1811,7 @@ $result = json_decode($output,true);
             },
 
             title: {
-                text: 'I have proactively asked to have a career conversation with a professional at an organization I’m interested in working for',
+                text: 'I have proactively asked to have a career conversation with a professional at an organization Im interested in working for.',
                 align: 'left'
             },
 
@@ -2058,15 +1826,13 @@ $result = json_decode($output,true);
                     color: '#1e5e34',
                     dataLabels: {
                         enabled: true,
-                        inside: true,
+                        inside: false,
                     }
                 },
             },
 
             xAxis: {
-                categories: ['Not and I had not considered this', 'Not yet but I plan to', 'Yes, Once',
-                    'Yes, Multiple times'
-                ],
+                categories: <?= json_encode($social_bars_data['I have proactively asked to have a career conversation with a professional at an organization Im interested in working for.']['labels']);?>,
                 crosshair: true,
                 accessibility: {
                     description: 'Labels'
@@ -2082,21 +1848,17 @@ $result = json_decode($output,true);
             series: [{
                 dataLabels: [{
                     align: 'right',
-                    format: '{y} ({point.per}%)'
+                    inside: false,
+                    floating: true,
+                    formatter: function() {
+                        var max = this.series.yAxis.max;
+                        var color = this.y / max <= 0.1 ? 'black' : 'white'; // 5% width
+                        perc = ((this.y / max).toFixed(2)) * 100;
+                        return '<span style="color: ' + color + '">' + this.y + '(' + perc +
+                            '%)</span>';
+                    },
                 }],
-                data: [{
-                    y: 40,
-                    per: 72,
-                }, {
-                    y: 30,
-                    per: 74,
-                }, {
-                    y: 48,
-                    per: 83
-                }, {
-                    y: 47,
-                    per: 80
-                }],
+                data: <?= json_encode($social_bars_data['I have proactively asked to have a career conversation with a professional at an organization Im interested in working for.']['formatted_data']);?>,
                 showInLegend: false
             }]
 
@@ -2109,7 +1871,7 @@ $result = json_decode($output,true);
             },
 
             title: {
-                text: 'I have proactively asked to have a career conversation with a professional at an organization I’m interested in working for',
+                text: 'I have proactively reached out to an alum from my school to learn about their career path.',
                 align: 'left'
             },
 
@@ -2124,15 +1886,13 @@ $result = json_decode($output,true);
                     color: '#1e5e34',
                     dataLabels: {
                         enabled: true,
-                        inside: true,
+                        inside: false,
                     }
                 },
             },
 
             xAxis: {
-                categories: ['Not and I had not considered this', 'Not yet but I plan to', 'Yes, Once',
-                    'Yes, Multiple times'
-                ],
+                categories: <?= json_encode($social_bars_data['I have proactively reached out to an alum from my school to learn about their career path.']['labels']);?>,
                 crosshair: true,
                 accessibility: {
                     description: 'Labels'
@@ -2148,21 +1908,17 @@ $result = json_decode($output,true);
             series: [{
                 dataLabels: [{
                     align: 'right',
-                    format: '{y} ({point.per}%)'
+                    inside: false,
+                    floating: true,
+                    formatter: function() {
+                        var max = this.series.yAxis.max;
+                        var color = this.y / max <= 0.1 ? 'black' : 'white'; // 5% width
+                        perc = ((this.y / max).toFixed(2)) * 100;
+                        return '<span style="color: ' + color + '">' + this.y + '(' + perc +
+                            '%)</span>';
+                    },
                 }],
-                data: [{
-                    y: 40,
-                    per: 72,
-                }, {
-                    y: 30,
-                    per: 74,
-                }, {
-                    y: 48,
-                    per: 83
-                }, {
-                    y: 47,
-                    per: 80
-                }],
+                data: <?= json_encode($social_bars_data['I have proactively reached out to an alum from my school to learn about their career path.']['formatted_data']);?>,
                 showInLegend: false
             }]
 
@@ -2173,273 +1929,6 @@ $result = json_decode($output,true);
 
 
         Highcharts.chart('life_chart1', {
-
-            chart: {
-                type: 'bar'
-            },
-
-            title: {
-                text: 'When things dont go the way I had envisioned or when I encounter a setback, I recognize that the setback is an opportunity to learn and grow, rather than a mistake?',
-                align: 'left'
-            },
-
-            plotOptions: {
-                column: {
-                    pointPadding: 0.5,
-                    borderWidth: 0,
-                    backgroundColor: '#ff8c00',
-                },
-                series: {
-                    pointWidth: 30,
-                    color: '#ff8c00',
-                    dataLabels: {
-                        enabled: true,
-                        inside: true,
-                    }
-                },
-            },
-
-            xAxis: {
-                categories: ['Strongly Disagree', 'Disagree', 'Agree',
-                    'Strongly Agree'
-                ],
-                crosshair: true,
-                accessibility: {
-                    description: 'Labels'
-                },
-            },
-
-            yAxis: {
-                title: {
-                    text: 'Responses'
-                }
-            },
-
-            series: [{
-                dataLabels: [{
-                    align: 'right',
-                    format: '{y} ({point.per}%)'
-                }],
-                data: [{
-                    y: 40,
-                    per: 72,
-                }, {
-                    y: 30,
-                    per: 74,
-                }, {
-                    y: 48,
-                    per: 83
-                }, {
-                    y: 47,
-                    per: 80
-                }],
-                showInLegend: false
-            }]
-
-        });
-
-
-        Highcharts.chart('life_chart2', {
-
-            chart: {
-                type: 'bar'
-            },
-
-            title: {
-                text: 'When I feel stuck in life, I reach out to others who help me uncover new solutions or ways of thinking about the situation.',
-                align: 'left'
-            },
-
-            plotOptions: {
-                column: {
-                    pointPadding: 0.5,
-                    borderWidth: 0,
-                    backgroundColor: '#ff8c00',
-                },
-                series: {
-                    pointWidth: 30,
-                    color: '#ff8c00',
-                    dataLabels: {
-                        enabled: true,
-                        inside: true,
-                    }
-                },
-            },
-
-            xAxis: {
-                categories: ['Strongly Disagree', 'Disagree', 'Agree',
-                    'Strongly Agree'
-                ],
-                crosshair: true,
-                accessibility: {
-                    description: 'Labels'
-                },
-            },
-
-            yAxis: {
-                title: {
-                    text: 'Responses'
-                }
-            },
-
-            series: [{
-                dataLabels: [{
-                    align: 'right',
-                    format: '{y} ({point.per}%)'
-                }],
-                data: [{
-                    y: 40,
-                    per: 72,
-                }, {
-                    y: 30,
-                    per: 74,
-                }, {
-                    y: 48,
-                    per: 83
-                }, {
-                    y: 47,
-                    per: 80
-                }],
-                showInLegend: false
-            }]
-
-        });
-
-        Highcharts.chart('life_chart3', {
-
-            chart: {
-                type: 'bar'
-            },
-
-            title: {
-                text: 'When I feel stuck in regards to my career plans, I have strategies I use to help me move forward (become “unstuck”).',
-                align: 'left'
-            },
-
-            plotOptions: {
-                column: {
-                    pointPadding: 0.5,
-                    borderWidth: 0,
-                    backgroundColor: '#ff8c00',
-                },
-                series: {
-                    pointWidth: 30,
-                    color: '#ff8c00',
-                    dataLabels: {
-                        enabled: true,
-                        inside: true,
-                    }
-                },
-            },
-
-            xAxis: {
-                categories: ['Strongly Disagree', 'Disagree', 'Agree',
-                    'Strongly Agree'
-                ],
-                crosshair: true,
-                accessibility: {
-                    description: 'Labels'
-                },
-            },
-
-            yAxis: {
-                title: {
-                    text: 'Responses'
-                }
-            },
-
-            series: [{
-                dataLabels: [{
-                    align: 'right',
-                    format: '{y} ({point.per}%)'
-                }],
-                data: [{
-                    y: 40,
-                    per: 72,
-                }, {
-                    y: 30,
-                    per: 74,
-                }, {
-                    y: 48,
-                    per: 83
-                }, {
-                    y: 47,
-                    per: 80
-                }],
-                showInLegend: false
-            }]
-
-        });
-
-
-        Highcharts.chart('life_chart4', {
-
-            chart: {
-                type: 'bar'
-            },
-
-            title: {
-                text: 'I think taking measured risks and learning to embrace failure is important in my career success.',
-                align: 'left'
-            },
-
-            plotOptions: {
-                column: {
-                    pointPadding: 0.5,
-                    borderWidth: 0,
-                    backgroundColor: '#ff8c00',
-                },
-                series: {
-                    pointWidth: 30,
-                    color: '#ff8c00',
-                    dataLabels: {
-                        enabled: true,
-                        inside: true,
-                    }
-                },
-            },
-
-            xAxis: {
-                categories: ['Strongly Disagree', 'Disagree', 'Agree',
-                    'Strongly Agree'
-                ],
-                crosshair: true,
-                accessibility: {
-                    description: 'Labels'
-                },
-            },
-
-            yAxis: {
-                title: {
-                    text: 'Responses'
-                }
-            },
-
-            series: [{
-                dataLabels: [{
-                    align: 'right',
-                    format: '{y} ({point.per}%)'
-                }],
-                data: [{
-                    y: 40,
-                    per: 72,
-                }, {
-                    y: 30,
-                    per: 74,
-                }, {
-                    y: 48,
-                    per: 83
-                }, {
-                    y: 47,
-                    per: 80
-                }],
-                showInLegend: false
-            }]
-
-        });
-
-
-        Highcharts.chart('life_chart5', {
 
             chart: {
                 type: 'bar'
@@ -2461,15 +1950,13 @@ $result = json_decode($output,true);
                     color: '#ff8c00',
                     dataLabels: {
                         enabled: true,
-                        inside: true,
+                        inside: false,
                     }
                 },
             },
 
             xAxis: {
-                categories: ['Strongly Disagree', 'Disagree', 'Agree',
-                    'Strongly Agree'
-                ],
+                categories: <?= json_encode($life_design_data['I have the tools I need to build a happy, meaningful, and successful life.']['labels']);?>,
                 crosshair: true,
                 accessibility: {
                     description: 'Labels'
@@ -2485,28 +1972,24 @@ $result = json_decode($output,true);
             series: [{
                 dataLabels: [{
                     align: 'right',
-                    format: '{y} ({point.per}%)'
+                    inside: false,
+                    floating: true,
+                    formatter: function() {
+                        var max = this.series.yAxis.max;
+                        var color = 'black'; // 5% width
+                        perc = ((this.y / max).toFixed(2)) * 100;
+                        return '<span style="color: ' + color + '">' + this.y + '(' + perc +
+                            '%)</span>';
+                    },
                 }],
-                data: [{
-                    y: 40,
-                    per: 72,
-                }, {
-                    y: 30,
-                    per: 74,
-                }, {
-                    y: 48,
-                    per: 83
-                }, {
-                    y: 47,
-                    per: 80
-                }],
+                data: <?= json_encode($life_design_data['I have the tools I need to build a happy, meaningful, and successful life.']['formatted_data']);?>,
                 showInLegend: false
             }]
 
         });
 
 
-        Highcharts.chart('life_chart6', {
+        Highcharts.chart('life_chart2', {
 
             chart: {
                 type: 'bar'
@@ -2528,15 +2011,13 @@ $result = json_decode($output,true);
                     color: '#ff8c00',
                     dataLabels: {
                         enabled: true,
-                        inside: true,
+                        inside: false,
                     }
                 },
             },
 
             xAxis: {
-                categories: ['Strongly Disagree', 'Disagree', 'Agree',
-                    'Strongly Agree'
-                ],
+                categories: <?= json_encode($life_design_data['I often try to look at problems from different perspectives to find new ways to move forward.']['labels']);?>,
                 crosshair: true,
                 accessibility: {
                     description: 'Labels'
@@ -2552,26 +2033,263 @@ $result = json_decode($output,true);
             series: [{
                 dataLabels: [{
                     align: 'right',
-                    format: '{y} ({point.per}%)'
+                    inside: false,
+                    floating: true,
+                    formatter: function() {
+                        var max = this.series.yAxis.max;
+                        var color = 'black'; // 5% width
+                        perc = ((this.y / max).toFixed(2)) * 100;
+                        return '<span style="color: ' + color + '">' + this.y + '(' + perc +
+                            '%)</span>';
+                    },
                 }],
-                data: [{
-                    y: 40,
-                    per: 72,
-                }, {
-                    y: 30,
-                    per: 74,
-                }, {
-                    y: 48,
-                    per: 83
-                }, {
-                    y: 47,
-                    per: 80
-                }],
+                data: <?= json_encode($life_design_data['I often try to look at problems from different perspectives to find new ways to move forward.']['formatted_data']);?>,
                 showInLegend: false
             }]
 
         });
 
+        Highcharts.chart('life_chart3', {
+
+            chart: {
+                type: 'bar'
+            },
+
+            title: {
+                text: 'I think taking measured risks and learning to embrace failure is important in my career success.',
+                align: 'left'
+            },
+
+            plotOptions: {
+                column: {
+                    pointPadding: 0.5,
+                    borderWidth: 0,
+                    backgroundColor: '#ff8c00',
+                },
+                series: {
+                    pointWidth: 30,
+                    color: '#ff8c00',
+                    dataLabels: {
+                        enabled: true,
+                        inside: false,
+                    }
+                },
+            },
+
+            xAxis: {
+                categories: <?= json_encode($life_design_data['I think taking measured risks and learning to embrace failure is important in my career success.']['labels']);?>,
+                crosshair: true,
+                accessibility: {
+                    description: 'Labels'
+                },
+            },
+
+            yAxis: {
+                title: {
+                    text: 'Responses'
+                }
+            },
+
+            series: [{
+                dataLabels: [{
+                    align: 'right',
+                    inside: false,
+                    floating: true,
+                    formatter: function() {
+                        var max = this.series.yAxis.max;
+                        var color = 'black'; // 5% width
+                        perc = ((this.y / max).toFixed(2)) * 100;
+                        return '<span style="color: ' + color + '">' + this.y + '(' + perc +
+                            '%)</span>';
+                    },
+                }],
+                data: <?= json_encode($life_design_data['I think taking measured risks and learning to embrace failure is important in my career success.']['formatted_data']);?>,
+                showInLegend: false
+            }]
+
+        });
+
+        Highcharts.chart('life_chart4', {
+
+            chart: {
+                type: 'bar'
+            },
+
+            title: {
+                text: 'When I feel stuck in life, I reach out to others who help me uncover new solutions or ways of thinking about the situation.',
+                align: 'left'
+            },
+
+            plotOptions: {
+                column: {
+                    pointPadding: 0.5,
+                    borderWidth: 0,
+                    backgroundColor: '#ff8c00',
+                },
+                series: {
+                    pointWidth: 30,
+                    color: '#ff8c00',
+                    dataLabels: {
+                        enabled: true,
+                        inside: false,
+                    }
+                },
+            },
+
+            xAxis: {
+                categories: <?= json_encode($life_design_data['When I feel stuck in life, I reach out to others who help me uncover new solutions or ways of thinking about the situation.']['labels']);?>,
+                crosshair: true,
+                accessibility: {
+                    description: 'Labels'
+                },
+            },
+
+            yAxis: {
+                title: {
+                    text: 'Responses'
+                }
+            },
+
+            series: [{
+                dataLabels: [{
+                    align: 'right',
+                    inside: false,
+                    floating: true,
+                    formatter: function() {
+                        var max = this.series.yAxis.max;
+                        var color = 'black'; // 5% width
+                        perc = ((this.y / max).toFixed(2)) * 100;
+                        return '<span style="color: ' + color + '">' + this.y + '(' + perc +
+                            '%)</span>';
+                    },
+                }],
+                data: <?= json_encode($life_design_data['When I feel stuck in life, I reach out to others who help me uncover new solutions or ways of thinking about the situation.']['formatted_data']);?>,
+                showInLegend: false
+            }]
+
+        });
+
+
+        Highcharts.chart('life_chart5', {
+
+            chart: {
+                type: 'bar'
+            },
+
+            title: {
+                text: 'When I feel stuck in regards to my career plans, I have strategies I use to help me move forward (become unstuck).',
+                align: 'left'
+            },
+
+            plotOptions: {
+                column: {
+                    pointPadding: 0.5,
+                    borderWidth: 0,
+                    backgroundColor: '#ff8c00',
+                },
+                series: {
+                    pointWidth: 30,
+                    color: '#ff8c00',
+                    dataLabels: {
+                        enabled: true,
+                        inside: false,
+                    }
+                },
+            },
+
+            xAxis: {
+                categories: <?= json_encode($life_design_data['When I feel stuck in regards to my career plans, I have strategies I use to help me move forward (become unstuck).']['labels']);?>,
+                crosshair: true,
+                accessibility: {
+                    description: 'Labels'
+                },
+            },
+
+            yAxis: {
+                title: {
+                    text: 'Responses'
+                }
+            },
+
+            series: [{
+                dataLabels: [{
+                    align: 'right',
+                    inside: false,
+                    floating: true,
+                    formatter: function() {
+                        var max = this.series.yAxis.max;
+                        var color = 'black'; // 5% width
+                        perc = ((this.y / max).toFixed(2)) * 100;
+                        return '<span style="color: ' + color + '">' + this.y + '(' + perc +
+                            '%)</span>';
+                    },
+                }],
+                data: <?= json_encode($life_design_data['When I feel stuck in regards to my career plans, I have strategies I use to help me move forward (become unstuck).']['formatted_data']);?>,
+                showInLegend: false
+            }]
+
+        });
+
+
+        Highcharts.chart('life_chart6', {
+
+            chart: {
+                type: 'bar'
+            },
+
+            title: {
+                text: 'When things dont go the way I had envisioned or when I encounter a setback, I recognize that the setback is an opportunity to learn and grow, rather than a mistake.',
+                align: 'left'
+            },
+
+            plotOptions: {
+                column: {
+                    pointPadding: 0.5,
+                    borderWidth: 0,
+                    backgroundColor: '#ff8c00',
+                },
+                series: {
+                    pointWidth: 30,
+                    color: '#ff8c00',
+                    dataLabels: {
+                        enabled: true,
+                        inside: false,
+                    }
+                },
+            },
+
+            xAxis: {
+                categories: <?= json_encode($life_design_data['When things dont go the way I had envisioned or when I encounter a setback, I recognize that the setback is an opportunity to learn and grow, rather than a mistake.']['labels']);?>,
+                crosshair: true,
+                accessibility: {
+                    description: 'Labels'
+                },
+            },
+
+            yAxis: {
+                title: {
+                    text: 'Responses'
+                }
+            },
+
+            series: [{
+                dataLabels: [{
+                    align: 'right',
+                    inside: false,
+                    floating: true,
+                    formatter: function() {
+                        var max = this.series.yAxis.max;
+                        var color = 'black'; // 5% width
+                        perc = ((this.y / max).toFixed(2)) * 100;
+                        return '<span style="color: ' + color + '">' + this.y + '(' + perc +
+                            '%)</span>';
+                    },
+                }],
+                data: <?= json_encode($life_design_data['When things dont go the way I had envisioned or when I encounter a setback, I recognize that the setback is an opportunity to learn and grow, rather than a mistake.']['formatted_data']);?>,
+                showInLegend: false
+            }]
+
+        });
 
         // Highcharts.chart('career_chart1', {
         //     chart: {
@@ -2644,7 +2362,7 @@ $result = json_decode($output,true);
         // });
 
         var options = {
-            series: [25, 25, 25, 25],
+            series: <?= json_encode($career_mobility_pie_data['Professor or Faculty Member (Choose Below)']['values']); ?>,
             chart: {
                 type: 'donut',
                 height: 400,
@@ -2654,11 +2372,51 @@ $result = json_decode($output,true);
                 colors: ['#2f5f98', '#2c8bba', '#40b8d5', '#6ce5e8']
             },
             legend: {
-                show: false
+                show: false,
+                showForSingleSeries: false,
+                showForNullSeries: true,
+                showForZeroSeries: true,
+                position: 'bottom',
+                horizontalAlign: 'left',
+                floating: false,
+                fontSize: '16px',
+                fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+                fontWeight: 400,
+                formatter: undefined,
+                inverseOrder: false,
+                width: undefined,
+                height: undefined,
+                tooltipHoverFormatter: undefined,
+                customLegendItems: [],
+                offsetX: 0,
+                offsetY: 50,
+
+                labels: {
+                    colors: undefined,
+                    useSeriesColors: false
+                },
+                markers: {
+                    size: 9,
+                    shape: 'square',
+                    strokeWidth: 1,
+                    fillColors: undefined,
+                    customHTML: undefined,
+                    onClick: undefined,
+                    offsetX: 0,
+                    offsetY: 0
+                },
+                itemMargin: {
+                    horizontal: 10,
+                    vertical: 5
+                },
+                onItemClick: {
+                    toggleDataSeries: true
+                },
+                onItemHover: {
+                    highlightDataSeries: true
+                },
             },
-            labels: ['Not and I had not considered this', 'Not yet but I plan to', 'Yes, Once',
-                'Yes, Multiple times'
-            ],
+            labels: <?= json_encode($career_mobility_pie_data['Professor or Faculty Member (Choose Below)']['labels']); ?>,
             responsive: [{
                 breakpoint: 480,
                 options: {
@@ -2746,7 +2504,7 @@ $result = json_decode($output,true);
         // });
 
         var options = {
-            series: [25, 25, 25, 25],
+            series: <?= json_encode($career_mobility_pie_data['Career Counselor (Choose Below)']['values']); ?>,
             chart: {
                 type: 'donut',
                 height: 400,
@@ -2758,9 +2516,7 @@ $result = json_decode($output,true);
             legend: {
                 show: false
             },
-            labels: ['Not and I had not considered this', 'Not yet but I plan to', 'Yes, Once',
-                'Yes, Multiple times'
-            ],
+            labels: <?= json_encode($career_mobility_pie_data['Career Counselor (Choose Below)']['labels']); ?>,
             responsive: [{
                 breakpoint: 480,
                 options: {
@@ -2848,7 +2604,7 @@ $result = json_decode($output,true);
         // });
 
         var options = {
-            series: [25, 25, 25, 25],
+            series: <?= json_encode($career_mobility_pie_data['Employers (Choose Below)']['values']); ?>,
             chart: {
                 type: 'donut',
                 height: 400,
@@ -2860,9 +2616,7 @@ $result = json_decode($output,true);
             legend: {
                 show: false
             },
-            labels: ['Not and I had not considered this', 'Not yet but I plan to', 'Yes, Once',
-                'Yes, Multiple times'
-            ],
+            labels: <?= json_encode($career_mobility_pie_data['Employers (Choose Below)']['labels']); ?>,
             responsive: [{
                 breakpoint: 480,
                 options: {
@@ -2887,7 +2641,7 @@ $result = json_decode($output,true);
             },
 
             title: {
-                text: 'My college/university has helped me build relationships with employers.',
+                text: 'I feel prepared to land internships / jobs / research positions that have not been posted online.',
                 align: 'left'
             },
 
@@ -2908,7 +2662,9 @@ $result = json_decode($output,true);
             },
 
             xAxis: {
-                categories: ['No', 'Not Yet', 'Yes'],
+                categories: <?= json_encode($career_mobility_data[
+                            'I feel prepared to land internships / jobs / research positions that have not been posted online.'
+                            ]['labels']);?>,
                 crosshair: true,
                 accessibility: {
                     description: 'Labels'
@@ -2924,18 +2680,19 @@ $result = json_decode($output,true);
             series: [{
                 dataLabels: [{
                     align: 'right',
-                    format: '{y} ({point.per}%)'
+                    inside: false,
+                    floating: true,
+                    formatter: function() {
+                        var max = this.series.yAxis.max;
+                        var color = this.y / max <= 0.1 ? 'black' : 'white'; // 5% width
+                        perc = ((this.y / max).toFixed(2)) * 100;
+                        return '<span style="color: ' + color + '">' + this.y + '(' + perc +
+                            '%)</span>';
+                    },
                 }],
-                data: [{
-                    y: 40,
-                    per: 72,
-                }, {
-                    y: 30,
-                    per: 74,
-                }, {
-                    y: 48,
-                    per: 83
-                }, ],
+                data: <?= json_encode($career_mobility_data[
+                            'I feel prepared to land internships / jobs / research positions that have not been posted online.'
+                            ]['formatted_data']);?>,
                 showInLegend: false
             }]
 
@@ -2948,7 +2705,7 @@ $result = json_decode($output,true);
             },
 
             title: {
-                text: 'I have completed at least one experience working in an environment similar to my career interests (internship, research position, part- time job, significant volunteering).',
+                text: 'I have completed at least one experience working in an environment similar to my career interests.',
                 align: 'left'
             },
 
@@ -2969,7 +2726,9 @@ $result = json_decode($output,true);
             },
 
             xAxis: {
-                categories: ['No', 'Not Yet', 'Yes'],
+                categories: <?= json_encode($career_mobility_data[
+                            'I have completed at least one experience working in an environment similar to my career interests.'
+                            ]['labels']);?>,
                 crosshair: true,
                 accessibility: {
                     description: 'Labels'
@@ -2985,18 +2744,19 @@ $result = json_decode($output,true);
             series: [{
                 dataLabels: [{
                     align: 'right',
-                    format: '{y} ({point.per}%)'
+                    inside: false,
+                    floating: true,
+                    formatter: function() {
+                        var max = this.series.yAxis.max;
+                        var color = this.y / max <= 0.1 ? 'black' : 'white'; // 5% width
+                        perc = ((this.y / max).toFixed(2)) * 100;
+                        return '<span style="color: ' + color + '">' + this.y + '(' + perc +
+                            '%)</span>';
+                    },
                 }],
-                data: [{
-                    y: 40,
-                    per: 72,
-                }, {
-                    y: 30,
-                    per: 74,
-                }, {
-                    y: 48,
-                    per: 83
-                }, ],
+                data: <?= json_encode($career_mobility_data[
+                            'I have completed at least one experience working in an environment similar to my career interests.'
+                            ]['formatted_data']);?>,
                 showInLegend: false
             }]
 
@@ -3030,7 +2790,9 @@ $result = json_decode($output,true);
             },
 
             xAxis: {
-                categories: ['No', 'Not Yet', 'Yes'],
+                categories: <?= json_encode($career_mobility_data[
+                            'I have created career plans with guidance from a staff or faculty member at my college.'
+                            ]['labels']);?>,
                 crosshair: true,
                 accessibility: {
                     description: 'Labels'
@@ -3046,18 +2808,19 @@ $result = json_decode($output,true);
             series: [{
                 dataLabels: [{
                     align: 'right',
-                    format: '{y} ({point.per}%)'
+                    inside: false,
+                    floating: true,
+                    formatter: function() {
+                        var max = this.series.yAxis.max;
+                        var color = this.y / max <= 0.1 ? 'black' : 'white'; // 5% width
+                        perc = ((this.y / max).toFixed(2)) * 100;
+                        return '<span style="color: ' + color + '">' + this.y + '(' + perc +
+                            '%)</span>';
+                    },
                 }],
-                data: [{
-                    y: 40,
-                    per: 72,
-                }, {
-                    y: 30,
-                    per: 74,
-                }, {
-                    y: 48,
-                    per: 83
-                }, ],
+                data: <?= json_encode($career_mobility_data[
+                            'I have created career plans with guidance from a staff or faculty member at my college.'
+                            ]['formatted_data']);?>,
                 showInLegend: false
             }]
 
@@ -3070,7 +2833,7 @@ $result = json_decode($output,true);
             },
 
             title: {
-                text: 'I have received feedback on my resume, and I am confident that it effectively showcases my candidacy (from counselors, professionals and/or my schools resume software provider).',
+                text: 'I have received feedback on my resume, and I am confident that it effectively showcases my candidacy.',
                 align: 'left'
             },
 
@@ -3091,11 +2854,9 @@ $result = json_decode($output,true);
             },
 
             xAxis: {
-                categories: ["I have received feedback and I am confident",
-                    "I have received feedback and I am not confident",
-                    "I haven't received feedback and I am confident",
-                    "I haven't received feedback and I am not confident"
-                ],
+                categories: <?= json_encode($career_mobility_data[
+                            'I have received feedback on my resume, and I am confident that it effectively showcases my candidacy.'
+                            ]['labels']);?>,
                 crosshair: true,
                 accessibility: {
                     description: 'Labels'
@@ -3111,21 +2872,19 @@ $result = json_decode($output,true);
             series: [{
                 dataLabels: [{
                     align: 'right',
-                    format: '{y} ({point.per}%)'
+                    inside: false,
+                    floating: true,
+                    formatter: function() {
+                        var max = this.series.yAxis.max;
+                        var color = this.y / max <= 0.1 ? 'black' : 'white'; // 5% width
+                        perc = ((this.y / max).toFixed(2)) * 100;
+                        return '<span style="color: ' + color + '">' + this.y + '(' + perc +
+                            '%)</span>';
+                    },
                 }],
-                data: [{
-                    y: 40,
-                    per: 72,
-                }, {
-                    y: 30,
-                    per: 74,
-                }, {
-                    y: 48,
-                    per: 83
-                }, {
-                    y: 32,
-                    per: 76
-                }, ],
+                data: <?= json_encode($career_mobility_data[
+                            'I have received feedback on my resume, and I am confident that it effectively showcases my candidacy.'
+                            ]['formatted_data']);?>,
                 showInLegend: false
             }]
 
@@ -3139,7 +2898,7 @@ $result = json_decode($output,true);
             },
 
             title: {
-                text: 'I feel prepared to land internships, jobs, or research positions that have not been posted online.',
+                text: 'I have received helpful career advice from a faculty member, career counselor, or employer.',
                 align: 'left'
             },
 
@@ -3160,11 +2919,9 @@ $result = json_decode($output,true);
             },
 
             xAxis: {
-                categories: ["Strongly Disagree",
-                    "Disagree",
-                    "Agree",
-                    "Strongly Agree"
-                ],
+                categories: <?= json_encode($career_mobility_data[
+                            'I have received helpful career advice from a faculty member, career counselor, or employer.'
+                            ]['labels']);?>,
                 crosshair: true,
                 accessibility: {
                     description: 'Labels'
@@ -3180,21 +2937,19 @@ $result = json_decode($output,true);
             series: [{
                 dataLabels: [{
                     align: 'right',
-                    format: '{y} ({point.per}%)'
+                    inside: false,
+                    floating: true,
+                    formatter: function() {
+                        var max = this.series.yAxis.max;
+                        var color = this.y / max <= 0.1 ? 'black' : 'white'; // 5% width
+                        perc = ((this.y / max).toFixed(2)) * 100;
+                        return '<span style="color: ' + color + '">' + this.y + '(' + perc +
+                            '%)</span>';
+                    },
                 }],
-                data: [{
-                    y: 40,
-                    per: 72,
-                }, {
-                    y: 30,
-                    per: 74,
-                }, {
-                    y: 48,
-                    per: 83
-                }, {
-                    y: 32,
-                    per: 76
-                }, ],
+                data: <?= json_encode($career_mobility_data[
+                            'I have received helpful career advice from a faculty member, career counselor, or employer.'
+                            ]['formatted_data']);?>,
                 showInLegend: false
             }]
 
